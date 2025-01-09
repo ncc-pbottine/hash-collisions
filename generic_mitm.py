@@ -20,7 +20,7 @@ class MultiplicativeHash():
         self.INITIAL_VALUE = initial_value
         self.MULTIPLIER = multiplier
         self.hash_size = (1 << U32_SIZE)
-        self.INV_INITIAL_VALUE = pow(self.MULTIPLIER, -1, self.hash_size)
+        self.INV_MULTIPLIER = pow(self.MULTIPLIER, -1, self.hash_size)
 
 
     def hash(self, val):
@@ -36,7 +36,7 @@ class MultiplicativeHash():
     def __partial_backward_hash(self, val, target):
         hash_target = target
         for char in val[::-1]:
-            hash_target = (((hash_target - char) * self.INV_INITIAL_VALUE)) & U32_MASK
+            hash_target = (((hash_target - char) * self.INV_MULTIPLIER)) & U32_MASK
         return hash_target
 
 
