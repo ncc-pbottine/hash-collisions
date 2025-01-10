@@ -53,16 +53,16 @@ class MultiplicativeHash():
         sys.stdout.write(f'\rProgress: [{bar}] {percent:.2f}%')
         sys.stdout.flush()
 
-    def meet_in_middle(self, prefix_size, suffix_size, n_collisions=10):
+    def meet_in_middle(self, prefix_size, suffix_size, n_collisions=10, target_hash=None):
         precomp = {}
         
-        target = self.__rand_generator(prefix_size + suffix_size)
-        target_hash = self.hash(target)
+        if target_hash is None:
+            target_hash = random.randint(0, 2**U32_SIZE - 1)
+
 
         # We upperbound the memory usage to 2^24
         upper_bound = min(24, suffix_size*8)
 
-        print("Target value: ", target)
         print("Target hash: ", target_hash)
         print("Entries in table: 2^", upper_bound, " = ", 2**upper_bound)
         print("Starting precomputations.")
