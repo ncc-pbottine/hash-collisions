@@ -46,6 +46,12 @@ class MultiplicativeHash():
     def __suffix_generator(self, int_val, len):
         return int_val.to_bytes(len, byteorder='big')
 
+    def __show_progress(self, current, total, bar_length=40):
+        progress = current / total
+        bar = '#' * int(progress * bar_length) + '-' * (bar_length - int(progress * bar_length))
+        percent = progress * 100
+        sys.stdout.write(f'\rProgress: [{bar}] {percent:.2f}%')
+        sys.stdout.flush()
 
     def meet_in_middle(self, prefix_size, suffix_size, n_collisions=10):
         precomp = {}
@@ -56,18 +62,25 @@ class MultiplicativeHash():
         # We upperbound the memory usage to 2^24
         upper_bound = min(24, suffix_size*8)
 
-        print("Target value : ", target)
-        print("Target hash : ", target_hash)
+        print("Target value: ", target)
+        print("Target hash: ", target_hash)
+        print("Entries in table: 2^", upper_bound, " = ", 2**upper_bound)
         print("Starting precomputations.")
 
-        for i in range(2**upper_bound):
+        total = 2**upper_bound
+        increment_display = total // 1000
+        for i in range(total):
+            # Displaying progress
+            if i % increment_display == 0 or i == total - 1:
+                self.__show_progress(i, total)
+
             s = self.__suffix_generator(i, suffix_size)
             h = self.__partial_backward_hash(s, target_hash)
             # print("{%s: %s}" % (binascii.hexlify(h.to_bytes(4, byteorder='big')), binascii.hexlify(s)))
             precomp[h] = s
         
-        print("Done precomputing.")
-
+        print("\nDone precomputing.")
+        
         input("Press Enter to start finding collisions...")
 
         # for k in precomp:
@@ -89,7 +102,7 @@ def print_c_array(hex_string):
 
 def consistency_tests():
     size = 10
-    prefix_size = 8
+    prefix_size = 7
     suffix_size = size - prefix_size
     mHash = MultiplicativeHash(5387, 31)
     collisions = mHash.meet_in_middle(prefix_size, suffix_size, 10)
