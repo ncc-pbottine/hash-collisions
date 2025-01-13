@@ -76,15 +76,12 @@ class MultiplicativeHash():
 
             s = self.__suffix_generator(i, suffix_size)
             h = self.__partial_backward_hash(s, target_hash)
-            # print("{%s: %s}" % (binascii.hexlify(h.to_bytes(4, byteorder='big')), binascii.hexlify(s)))
             precomp[h] = s
         
         print("\nDone precomputing.")
         
         input("Press Enter to start finding collisions...")
 
-        # for k in precomp:
-        #   print k, precomp[k]
         n = 0
         collisions = []
         while n != n_collisions:
@@ -105,7 +102,7 @@ def consistency_tests():
     prefix_size = 7
     suffix_size = size - prefix_size
     mHash = MultiplicativeHash(5387, 31)
-    collisions = mHash.meet_in_middle(prefix_size, suffix_size, 10)
+    collisions = mHash.meet_in_middle(prefix_size, suffix_size, 10, 0)
     hash1 = mHash.hash(collisions[0])
 
     for c in collisions[1:]:
