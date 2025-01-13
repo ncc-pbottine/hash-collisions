@@ -114,4 +114,11 @@ def main(args):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    parser = argparse.ArgumentParser(description="A script to generate colliding inputs for multiplicative hash functions.")
+    parser.add_argument('-f', '--format', type=str, choices=['c', 'hex', 'bytes'], default='hex',
+                        help="Output format: 'c' for C-style byte array, 'hex' for hexadecimal, 'bytes' for byte representation (default: 'hex').")
+    parser.add_argument('-o', '--output', type=str, help='Output file to write the result to. If not provided, prints to console.')
+
+    # parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose mode.')
+    args = parser.parse_args()
+    main(args)
