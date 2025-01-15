@@ -53,7 +53,7 @@ class MultiplicativeHash():
         sys.stdout.write(f'\rProgress: [{bar}] {percent:.2f}%')
         sys.stdout.flush()
 
-    def meet_in_middle(self, prefix_size, suffix_size, n_collisions=10, target_hash=None, output=None, print_fct=print):
+    def meet_in_middle(self, prefix_size, suffix_size, n_collisions=10, target_hash=None, output=None, print_fct=print, interactive=False):
         precomp = {}
         
         if target_hash is None:
@@ -71,7 +71,7 @@ class MultiplicativeHash():
         increment_display = total // 1000
         for i in range(total):
             # Displaying progress
-            if i % increment_display == 0 or i == total - 1:
+            if interactive and (i % increment_display == 0 or i == total - 1):
                 self.__show_progress(i, total)
 
             s = self.__suffix_generator(i, suffix_size)
@@ -79,8 +79,6 @@ class MultiplicativeHash():
             precomp[h] = s
         
         print("\nDone precomputing.")
-        
-        input("Press Enter to start finding collisions...")
 
         n = 0
         collisions = []
@@ -112,9 +110,9 @@ def consistency_tests():
         assert(mHash.hash(c) == hash1)
         # print(mHash.hash(c))
 
-def run_attack(prefix_size, suffix_size, initial_value, multiplier, n_collisions, print_fct):
+def run_attack(prefix_size, suffix_size, initial_value, multiplier, n_collisions, print_fct, interactive):
     mHash = MultiplicativeHash(initial_value, multiplier)
-    collisions = mHash.meet_in_middle(prefix_size, suffix_size, n_collisions=n_collisions, print_fct=print_fct)
+    collisions = mHash.meet_in_middle(prefix_size, suffix_size, n_collisions=n_collisions, print_fct=print_fct, interactive=interactive)
     print(collisions)
 
 def main(args):
@@ -124,7 +122,8 @@ def main(args):
         print_fct = print_c_array
     elif args.format == 'hex':
         print_fct = print_hex_string
-    run_attack(args.prefix, args.suffix, args.initial, args.multiplier, args.n_collisions, print_fct)
+
+    run_attack(args.prefix, args.suffix, args.initial, args.multiplier, args.n_collisions, print_fct, args.interactive)
 
 
 if __name__ == "__main__":
@@ -141,7 +140,7 @@ if __name__ == "__main__":
     parser.add_argument('-i', '--initial', type=int, default=5387, help='Initial value for the multiplicative hash computation.')
     parser.add_argument('-m', '--multiplier', type=int, default=31, help='Multiplier for the multiplicative hash computation.')
     parser.add_argument('-n', '--n-collisions', type=int, default=10, help='The number of collisions to compute.')
-
+    parser.add_argument('--interactive', action='store_true', help='Make it interactive, printing a progress bar.')
     # parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose mode.')
     args = parser.parse_args()
     main(args)
