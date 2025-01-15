@@ -53,7 +53,7 @@ class MultiplicativeHash():
         sys.stdout.write(f'\rProgress: [{bar}] {percent:.2f}%')
         sys.stdout.flush()
 
-    def meet_in_middle(self, prefix_size, suffix_size, n_collisions=10, target_hash=None):
+    def meet_in_middle(self, prefix_size, suffix_size, n_collisions=10, target_hash=None, output=None):
         precomp = {}
         
         if target_hash is None:
@@ -109,8 +109,15 @@ def consistency_tests():
         assert(mHash.hash(c) == hash1)
         # print(mHash.hash(c))
 
+def run_attack(prefix_size, suffix_size, initial_value, multiplier, n_collisions):
+    mHash = MultiplicativeHash(initial_value, multiplier)
+    collisions = mHash.meet_in_middle(prefix_size, suffix_size, n_collisions=n_collisions)
+    print(collisions)
+
 def main(args):
-    consistency_tests()
+    # consistency_tests()
+
+    run_attack(args.prefix, args.suffix, args.initial, args.multiplier, args.n_collisions)
 
 
 if __name__ == "__main__":
@@ -118,6 +125,11 @@ if __name__ == "__main__":
     parser.add_argument('-f', '--format', type=str, choices=['c', 'hex', 'bytes'], default='hex',
                         help="Output format: 'c' for C-style byte array, 'hex' for hexadecimal, 'bytes' for byte representation (default: 'hex').")
     parser.add_argument('-o', '--output', type=str, help='Output file to write the result to. If not provided, prints to console.')
+    parser.add_argument('-p', '--prefix', type=int, default=7, help='Prefix size')
+    parser.add_argument('-s', '--suffix', type=int, default=3, help='Suffix size. Dictates the size of the precomputation table.')
+    parser.add_argument('-i', '--initial', type=int, default=5387, help='Initial value for the multiplicative hash computation.')
+    parser.add_argument('-m', '--multiplier', type=int, default=31, help='Multiplier for the multiplicative hash computation.')
+    parser.add_argument('-n', '--n-collisions', type=int, default=10, help='The number of collisions to compute.')
 
     # parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose mode.')
     args = parser.parse_args()
