@@ -53,7 +53,7 @@ class MultiplicativeHash():
         sys.stdout.write(f'\rProgress: [{bar}] {percent:.2f}%')
         sys.stdout.flush()
 
-    def meet_in_middle(self, prefix_size, suffix_size, n_collisions=10, target_hash=None, output=None):
+    def meet_in_middle(self, prefix_size, suffix_size, n_collisions=10, target_hash=None, output=None, print_fct=print):
         precomp = {}
         
         if target_hash is None:
@@ -89,13 +89,16 @@ class MultiplicativeHash():
             h = self.__partial_forward_hash(s)
             if h in precomp:
                 # print(binascii.hexlify(s + precomp[h]))
-                print(s + precomp[h])
+                print_fct(s + precomp[h])
                 collisions.append(s + precomp[h])
                 n += 1
         return collisions
 
 def print_c_array(hex_string):
-    return "{" + ", ".join('0x%02x' % i for i in bytearray.fromhex(hex_string)) + "}"
+    print("{" + ", ".join('0x%02x' % i for i in hex_string) + "}")
+
+def print_hex_string(array):
+    print(binascii.hexlify(array))
 
 def consistency_tests():
     size = 10
@@ -109,21 +112,29 @@ def consistency_tests():
         assert(mHash.hash(c) == hash1)
         # print(mHash.hash(c))
 
-def run_attack(prefix_size, suffix_size, initial_value, multiplier, n_collisions):
+def run_attack(prefix_size, suffix_size, initial_value, multiplier, n_collisions, print_fct):
     mHash = MultiplicativeHash(initial_value, multiplier)
-    collisions = mHash.meet_in_middle(prefix_size, suffix_size, n_collisions=n_collisions)
+    collisions = mHash.meet_in_middle(prefix_size, suffix_size, n_collisions=n_collisions, print_fct=print_fct)
     print(collisions)
 
 def main(args):
     # consistency_tests()
-
-    run_attack(args.prefix, args.suffix, args.initial, args.multiplier, args.n_collisions)
+    print_fct = print
+    if args.format == 'c':
+        print_fct = print_c_array
+    elif args.format == 'hex':
+        print_fct = print_hex_string
+    run_attack(args.prefix, args.suffix, args.initial, args.multiplier, args.n_collisions, print_fct)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="A script to generate colliding inputs for multiplicative hash functions.")
-    parser.add_argument('-f', '--format', type=str, choices=['c', 'hex', 'bytes'], default='hex',
-                        help="Output format: 'c' for C-style byte array, 'hex' for hexadecimal, 'bytes' for byte representation (default: 'hex').")
+    parser.add_argument('-f', '--format', type=str, choices=['c', 'hex', 'bytes'], default='bytes',
+                        help="Output format: 'c' for C-style byte array, 'hex' for hexadecimal, 'bytes' for byte representation (default: 'bytes').")
+    # Todo:
+    # There should be 3 output options
+    # If the script is called as a standalone script, print to std out or file
+    # If it is called from somewhere else, return collisions or print to file
     parser.add_argument('-o', '--output', type=str, help='Output file to write the result to. If not provided, prints to console.')
     parser.add_argument('-p', '--prefix', type=int, default=7, help='Prefix size')
     parser.add_argument('-s', '--suffix', type=int, default=3, help='Suffix size. Dictates the size of the precomputation table.')
